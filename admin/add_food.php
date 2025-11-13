@@ -5,8 +5,6 @@ if (!isset($_SESSION['admin_id'])) {
     header("Location: login.php");
     exit;
 }
-
-// Fetch restaurants for dropdown
 $restaurants = $conn->query("SELECT id, name FROM restaurants");
 
 $error = '';
