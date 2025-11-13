@@ -1,19 +1,13 @@
 <?php
 session_start();
 require_once 'includes/config.php';
-
-// Redirect if not logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php?redirect=cart.php");
     exit;
 }
 
 $user_id = $_SESSION['user_id'];
-
-// Ensure cart exists
 if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-
-// Handle cart actions
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'remove':
@@ -49,7 +43,6 @@ if (isset($_GET['action'])) {
     }
 }
 
-// Calculate total
 $total = 0;
 foreach ($_SESSION['cart'] as $item) {
     $total += $item['price'] * $item['quantity'];
