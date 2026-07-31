@@ -1,162 +1,247 @@
-# 🍽️ GourmetHub - Restaurant Management & Food Ordering System
+<div align="center">
 
-![PHP](https://img.shields.io/badge/PHP-8.x-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-XAMPP-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![DaisyUI](https://img.shields.io/badge/DaisyUI-4.x-5A0E2D?style=for-the-badge&logo=daisyui&logoColor=white)
+  <br />
+  <h1 align="center">🍔 GourmetHub</h1>
+  <h3 align="center">Next-Gen Restaurant Management & Food Ordering System</h3>
 
-**GourmetHub** is a modern, responsive full-stack **Restaurant Management System & Online Food Ordering Platform** built with PHP, MySQL, Tailwind CSS, and DaisyUI 4. It provides a seamless food ordering experience for customers and a feature-rich administration control panel for restaurant management.
+  <p align="center">
+    A premium, full-stack PHP & MySQL web application powered by <b>Tailwind CSS</b> and <b>DaisyUI 4</b>.
+    <br />
+    <a href="#-quick-start--xampp-setup"><strong>Explore Setup Guide »</strong></a>
+    <br />
+    <br />
+    <a href="#-key-features">Key Features</a>
+    ·
+    <a href="#-tech-stack">Tech Stack</a>
+    ·
+    <a href="#-database-schema">Database Schema</a>
+    ·
+    <a href="#-credentials">Default Logins</a>
+  </p>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/PHP-8.2-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.2" />
+    <img src="https://img.shields.io/badge/MySQL-XAMPP-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+    <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+    <img src="https://img.shields.io/badge/DaisyUI-4.x-5A0E2D?style=for-the-badge&logo=daisyui&logoColor=white" alt="DaisyUI 4" />
+    <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="MIT License" />
+  </p>
+
+  <br />
+</div>
 
 ---
 
-## ✨ Features Breakdown
+## 📖 Overview
 
-### 🛍️ Customer Front-End Portal
-* **DaisyUI Modern Design & Modal Popups**: Built with modern typography, smooth glassmorphism, responsive cards, and **interactive DaisyUI `<dialog>` modals / popups** across all features (Quick Dish View, Review Submissions, Cart Confirmations, and Admin Actions).
-* **Multi-Theme Switcher**: Live theme switching with persistence in `localStorage` supporting **Emerald** (Default), **Light**, **Dark**, **Cupcake**, **Synthwave**, **Cyberpunk**, and **Retro**.
-* **Category & Cuisine Filter Bar**: Instant filtering for Fast Food, Italian, Indian, Asian, Pizza, Desserts, and Beverages.
-* **Star Ratings & Customer Reviews**: 1–5 star ratings and feedback for dishes and partner restaurants with calculated average rating badges.
-* **Interactive Cart & Quick Add**: Shopping cart drawer preview, direct "Add to Cart" from homepage cards, quantity updates, and cart item management.
-* **Interactive Order Tracking Timeline**: Real-time step progress indicator (`Order Placed ➔ Preparing ➔ Out for Delivery ➔ Delivered`).
-* **Multi-Payment Gateway Options**: Support for Cash on Delivery, bKash, Nagad, Rocket, and Credit/Debit Cards.
-* **User Profile & Address Management**: Edit name, phone, default delivery address, and change passwords on `profile.php`.
-* **1-Click Quick Re-Order**: Re-load items from past orders directly into the active cart from the user dashboard.
+**GourmetHub** is a state-of-the-art **Restaurant Management System and Online Food Delivery Platform**. Designed with modern UX principles, glassmorphism, responsive grid layouts, interactive modal popups, and multi-theme support, GourmetHub provides an effortless ordering experience for customers and comprehensive control tools for restaurant managers.
+
+---
+
+## 🌟 Key Features
+
+### 🛍️ Customer Front-End Experience
+* 🎨 **DaisyUI Design System & Modals**: Built using modern typography, glassmorphism, responsive cards, and `<dialog>` modal popups for quick dish previewing, cart confirmations, and reviews.
+* 🎭 **Multi-Theme Switcher**: Instant theme toggling saved in `localStorage` supporting **Emerald** (Default), **Light**, **Dark**, **Cupcake**, **Synthwave**, **Cyberpunk**, and **Retro**.
+* 🍕 **Dynamic Category Filters**: Filter dishes & restaurants by *Fast Food, Italian, Indian, Asian, Pizza, Desserts, and Beverages*.
+* ⭐ **Star Ratings & Customer Reviews**: 1–5 star rating system for dishes and partner restaurants with aggregate star badges.
+* 🚚 **Live Order Progress Steps**: Visual step timeline (`Order Placed ➔ Preparing ➔ Out for Delivery ➔ Delivered`).
+* 💳 **Multi-Payment Gateway Options**: Integrated payment options for Cash on Delivery, bKash, Nagad, Rocket, and Credit/Debit Cards.
+* 🔄 **1-Click Re-Order**: Reload items from previous orders directly into the shopping cart from the customer dashboard.
+* 👤 **User Account & Address Management**: Profile management page to edit delivery addresses and update passwords.
 
 ### 🛡️ Admin Control Panel
-* **Analytics Metrics & Statistics**: Real-time tracking of Total Revenue ($), Total Orders, Active Dishes, Partner Restaurants, Registered Users, and Order Status breakdowns.
-* **Order Management & Status Progression**: Advance order status transitions (`Pending` ➔ `Preparing` ➔ `Out for Delivery` ➔ `Delivered` / `Cancelled`).
-* **Dish & Menu Management**: Add, edit, search, filter, and toggle active status (`is_active`) for menu items with instant AJAX updates.
-* **Restaurant Partner Management**: Manage restaurant details, cuisine categories, contact info, opening hours, and banner photos.
-* **User Account Management**: Admin capability to manage registered customer profiles and reset user passwords.
+* 📊 **Analytics Dashboard**: Real-time revenue metrics (`SUM(total)`), status breakdown counts, user metrics, and menu item stats.
+* ⚡ **1-Click Order Processing**: Transition order states instantly (`Pending ➔ Preparing ➔ Out for Delivery ➔ Delivered / Cancelled`).
+* 🍔 **Dish & Menu Management**: Add, edit, toggle availability (`is_active`), and filter dishes with real-time AJAX search.
+* 🏬 **Restaurant Partner Management**: Manage restaurant details, cuisine categories, operating hours, and cover photos.
+* 👥 **User Account Control**: Manage registered customer profiles and reset user passwords securely.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-| Layer | Technologies Used |
-| :--- | :--- |
-| **Backend** | PHP 8.x, MySQLi Prepared Statements |
-| **Database** | MySQL / MariaDB (XAMPP / phpMyAdmin) |
-| **Frontend Styling** | Tailwind CSS CDN, DaisyUI 4.x |
-| **Icons & Typography** | FontAwesome 6, Google Fonts (Outfit & Inter) |
-| **Client Logic** | JavaScript (ES6+), jQuery 3.7 |
+```text
+├── Backend        : PHP 8.x (OOP & Procedural with Prepared SQL Statements)
+├── Database       : MySQL / MariaDB (XAMPP / phpMyAdmin Compatible)
+├── Frontend CSS   : Tailwind CSS 3.x + DaisyUI 4.x UI Component System
+├── Icons & Fonts  : FontAwesome 6 Pro Icons, Google Fonts (Outfit & Inter)
+└── Scripting      : ES6+ JavaScript, jQuery 3.7 (AJAX Filtering)
+```
 
 ---
 
-## 🚀 Quick Setup & Installation (XAMPP)
+## ⚡ Quick Start & XAMPP Setup
 
 ### 1. Prerequisites
-* Install [XAMPP](https://www.apachefriends.org/) (Apache + MySQL + PHP 7.4/8.x).
+Ensure you have **XAMPP** (or WAMP / MAMP) installed with **PHP >= 7.4/8.x** and **MySQL**.
 
-### 2. Project Setup
-Place the project directory into your XAMPP `htdocs` folder:
+### 2. Clone / Copy Repository
+Clone or copy the project into your local XAMPP `htdocs` directory:
 ```bash
-# Path for XAMPP
-htdocs/Restaurant-Management-System/
+git clone https://github.com/puc-void/Restaurant-Management-System.git
 ```
+Path: `C:\xampp\htdocs\Restaurant-Management-System\` (Windows) or `/opt/lampp/htdocs/Restaurant-Management-System/` (Linux).
 
 ### 3. Database Import via phpMyAdmin
-1. Open the **XAMPP Control Panel** and start **Apache** and **MySQL**.
-2. Open your browser and navigate to `http://localhost/phpmyadmin`.
-3. Click on the **Import** tab at the top.
-4. Click **Choose File** and select `database.sql` located at the root of the project:
-   ```
-   Restaurant-Management-System/database.sql
-   ```
-5. Click **Import** (or **Go**). The script will automatically create the `online_food` database and populate all tables with sample seed data.
+1. Launch **XAMPP Control Panel** and start **Apache** & **MySQL**.
+2. Open your browser and navigate to [http://localhost/phpmyadmin](http://localhost/phpmyadmin).
+3. Click the **Import** tab on top.
+4. Click **Choose File** and select `database.sql` located at the root of the workspace.
+5. Click **Import**. The database `online_food` will automatically be created and seeded.
 
-### 4. Database Configuration (Optional)
-Database credentials are pre-configured for standard XAMPP in `includes/config.php`:
-```php
-$host = "localhost";
-$user = "root";
-$pass = "";         // Default XAMPP MySQL password
-$db   = "online_food";
-```
-
-### 5. Access the Web Application
-* **Customer Front-End Portal**: `http://localhost/Restaurant-Management-System/`
-* **Admin Control Panel**: `http://localhost/Restaurant-Management-System/admin/`
+### 4. Launch the Web Application
+* 🌐 **Customer Front-End**: [http://localhost/Restaurant-Management-System/](http://localhost/Restaurant-Management-System/)
+* 🔐 **Admin Control Panel**: [http://localhost/Restaurant-Management-System/admin/](http://localhost/Restaurant-Management-System/admin/)
 
 ---
 
 ## 🔑 Default Login Credentials
 
-### 🛡️ Admin Portal (`/admin/login.php`)
-| Role | Email | Password |
+### 🛡️ Administrator Account
+| Portal | Email | Password |
 | :--- | :--- | :--- |
-| **System Admin** | `admin@restaurant.com` | `admin123` |
+| **Admin Panel** (`/admin/login.php`) | `admin@restaurant.com` | `admin123` |
 
-### 👤 Customer Account (`/login.php`)
-| Customer | Email | Password |
+### 👤 Customer Test Accounts
+| Portal | Email | Password |
 | :--- | :--- | :--- |
-| **John Doe** | `john@example.com` | `password123` |
-| **Jane Smith** | `jane@example.com` | `password123` |
+| **Customer Portal** (`/login.php`) | `john@example.com` | `password123` |
+| **Customer Portal** (`/login.php`) | `jane@example.com` | `password123` |
 
 ---
 
-## 🗂️ Project Directory Structure
+## 🗂️ Project Architecture & Directory Structure
 
 ```text
 Restaurant-Management-System/
-├── admin/                     # Admin Control Panel Directory
-│   ├── add_food.php           # Add new dish form
-│   ├── add_restaurant.php     # Add new restaurant form
-│   ├── dashboard.php          # Admin analytics dashboard
-│   ├── edit_food.php          # Edit dish form
-│   ├── edit_restaurant.php    # Edit restaurant form
-│   ├── edit_user.php          # Edit user account form
-│   ├── footer.php             # Admin layout footer
-│   ├── header.php             # Admin layout navbar & sidebar drawer
-│   ├── login.php              # Admin login page
-│   ├── logout.php             # Admin session logout
-│   ├── manage_foods.php       # Manage dishes table with AJAX filter
-│   ├── manage_orders.php      # Manage customer orders
-│   ├── manage_restaurants.php # Manage restaurants table
-│   ├── manage_users.php       # Manage registered users
-│   └── order_details.php      # Admin order details & status update
-├── assets/                    # Static JavaScript assets
-│   └── js/
-│       ├── checkout.js
-│       ├── search.js
-│       ├── update.js
-│       └── update_restaurant.js
-├── includes/                  # Shared PHP Include Files
-│   ├── config.php             # Database connection setup
-│   ├── footer.php             # Shared front-end footer
-│   ├── functions.php          # Rating, cart & helper functions
-│   └── header.php             # Shared front-end DaisyUI navbar
-├── cart.php                   # Shopping cart page
-├── checkout.php               # Order summary & payment gateway page
-├── create_admin.php           # Create initial admin account
-├── dashboard.php              # Customer dashboard & order history
-├── database.sql               # XAMPP database dump file
-├── dish.php                   # Dish details & customer reviews page
-├── index.php                  # Homepage with hero, categories & menu
-├── login.php                  # Customer login page
-├── logout.php                 # Customer session logout
-├── order_details.php          # Live order tracking timeline page
-├── profile.php                # Customer profile & address management
-├── register.php               # Customer registration page
-├── restaurant.php             # Restaurant profile & dishes menu page
-├── search.php                 # Live menu search & filter page
-└── README.md                  # Project documentation
+│
+├── 📂 admin/                     # Admin Portal Subsystem
+│   ├── add_food.php              # Create new menu item
+│   ├── add_restaurant.php        # Register new restaurant
+│   ├── dashboard.php             # Analytics & revenue dashboard
+│   ├── edit_food.php             # Edit menu item & pricing
+│   ├── edit_restaurant.php       # Edit restaurant details
+│   ├── edit_user.php             # Edit customer account
+│   ├── footer.php                # Admin drawer footer layout
+│   ├── header.php                # Admin sidebar drawer layout
+│   ├── login.php                 # Admin authentication portal
+│   ├── manage_foods.php          # Dish management table with AJAX
+│   ├── manage_orders.php         # Customer orders management table
+│   ├── manage_restaurants.php    # Restaurant partners table
+│   ├── manage_users.php          # Registered users table
+│   └── order_details.php         # Order progression & status modal
+│
+├── 📂 assets/                    # Client Assets
+│   └── js/                       # Custom JavaScript scripts
+│
+├── 📂 includes/                  # Core Shared Engine
+│   ├── config.php                # Database connection & session bootstrap
+│   ├── footer.php                # Front-end DaisyUI footer & theme engine
+│   ├── functions.php             # Shared utility functions (Ratings, Cart, Total)
+│   └── header.php                # Front-end DaisyUI navigation & cart drawer
+│
+├── cart.php                      # Shopping cart page with DaisyUI modals
+├── checkout.php                  # Checkout page with multi-payment gateways
+├── create_admin.php              # Initial admin account setup script
+├── dashboard.php                 # Customer dashboard & order history
+├── database.sql                  # XAMPP database dump file with seed data
+├── dish.php                      # Dish details & review modal page
+├── index.php                     # Hero banner, category pills & dish cards
+├── login.php                     # Customer login authentication
+├── logout.php                    # Session termination script
+├── order_details.php             # Live order tracking timeline page
+├── profile.php                   # Customer profile & address management
+├── register.php                  # New user registration portal
+├── restaurant.php                # Restaurant banner & menu page
+├── search.php                    # Menu & restaurant search page
+└── README.md                     # Project documentation
 ```
 
 ---
 
-## 💾 Database Schema Overview
+## 🗄️ Database Entity Schema
 
-* `users`: `id`, `name`, `email`, `password_plain`, `password_md5`, `phone`, `address`, `created_at`
-* `admins`: `id`, `name`, `email`, `password_plain`, `password_md5`, `created_at`
-* `restaurants`: `id`, `name`, `email`, `phone`, `address`, `category`, `opening_hours`, `image_url`, `created_at`
-* `foods`: `id`, `restaurant_id`, `name`, `description`, `price`, `category`, `is_active`, `image_url`, `created_at`
-* `orders`: `id`, `user_id`, `total`, `status`, `payment_method`, `payment_number`, `shipping_address`, `created_at`
-* `order_items`: `id`, `order_id`, `food_id`, `quantity`, `price`
-* `reviews`: `id`, `user_id`, `food_id`, `restaurant_id`, `rating`, `comment`, `created_at`
+```mermaid
+erDiagram
+    USERS ||--o{ ORDERS : places
+    USERS ||--o{ REVIEWS : writes
+    RESTAURANTS ||--o{ FOODS : serves
+    RESTAURANTS ||--o{ REVIEWS : receives
+    FOODS ||--o{ ORDER_ITEMS : contains
+    FOODS ||--o{ REVIEWS : receives
+    ORDERS ||--|{ ORDER_ITEMS : includes
+
+    USERS {
+        int id PK
+        string name
+        string email
+        string password_plain
+        string password_md5
+        string phone
+        text address
+        datetime created_at
+    }
+
+    RESTAURANTS {
+        int id PK
+        string name
+        string category
+        string phone
+        string email
+        text address
+        string opening_hours
+        text image_url
+    }
+
+    FOODS {
+        int id PK
+        int restaurant_id FK
+        string name
+        string category
+        decimal price
+        text description
+        boolean is_active
+        text image_url
+    }
+
+    ORDERS {
+        int id PK
+        int user_id FK
+        decimal total
+        enum status
+        string payment_method
+        string payment_number
+        text shipping_address
+        datetime created_at
+    }
+
+    ORDER_ITEMS {
+        int id PK
+        int order_id FK
+        int food_id FK
+        int quantity
+        decimal price
+    }
+
+    REVIEWS {
+        int id PK
+        int user_id FK
+        int food_id FK
+        int restaurant_id FK
+        int rating
+        text comment
+        datetime created_at
+    }
+```
 
 ---
 
-## 📜 License
+## 📜 License & Credits
 
-This project is open-source under the **MIT License**. Feel free to use, modify, and distribute for educational or commercial purposes.
+Distributed under the **MIT License**. Created for **GourmetHub Restaurant Management System**.
+
+<div align="center">
+  <br />
+  <sub>Built with ❤️ using PHP, MySQL, Tailwind CSS & DaisyUI.</sub>
+</div>
