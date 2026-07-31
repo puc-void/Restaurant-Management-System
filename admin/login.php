@@ -42,51 +42,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="emerald">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GourmetHub</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DaisyUI 4 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-heading { font-family: 'Outfit', sans-serif; }
+    </style>
 </head>
-<body class="min-h-screen bg-cover bg-center flex items-center justify-center"
-      style="background-image: url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1500&q=80');">
+<body class="min-h-screen bg-base-200 flex items-center justify-center p-4">
 
-    <div class="backdrop-blur-md bg-white/70 border border-white/30 shadow-2xl rounded-2xl p-8 w-full max-w-md">
-        <h2 class="text-3xl font-bold text-center text-blue-800 mb-6">Admin Login</h2>
+    <div class="card bg-base-100 shadow-2xl border border-base-300 w-full max-w-md p-8 space-y-6">
+        <div class="text-center space-y-2">
+            <div class="w-14 h-14 rounded-2xl bg-primary text-primary-content flex items-center justify-center text-2xl mx-auto shadow-md">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h1 class="text-2xl font-bold font-heading">Admin Portal Login</h1>
+            <p class="text-xs text-base-content/60">System Administration & Control Center</p>
+        </div>
 
         <?php if ($login_error): ?>
-            <div class="mb-4 text-red-700 bg-red-100 border border-red-300 rounded-lg p-3 text-center">
-                <?= htmlspecialchars($login_error) ?>
+            <div class="alert alert-error text-white shadow-md text-xs">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span><?= htmlspecialchars($login_error); ?></span>
             </div>
         <?php endif; ?>
 
         <form method="POST" class="space-y-4">
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Email</label>
-                <input type="email" name="email" placeholder="Enter your email"
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
+            <div class="form-control">
+                <label class="label text-xs font-bold">Admin Email</label>
+                <div class="relative">
+                    <input type="email" name="email" required placeholder="admin@restaurant.com" class="input input-bordered w-full text-sm pl-10" />
+                    <i class="fa-solid fa-envelope absolute left-3.5 top-3.5 text-base-content/40"></i>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-gray-700 font-medium mb-1">Password</label>
-                <input type="password" name="password" placeholder="Enter your password"
-                       class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" required>
+            <div class="form-control">
+                <label class="label text-xs font-bold">Admin Password</label>
+                <div class="relative">
+                    <input type="password" name="password" required placeholder="••••••••" class="input input-bordered w-full text-sm pl-10" />
+                    <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-base-content/40"></i>
+                </div>
             </div>
 
-            <button type="submit"
-                    class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-lg hover:bg-indigo-700 transition duration-200">
-                Login
+            <button type="submit" class="btn btn-primary btn-block shadow-lg gap-2 mt-4">
+                <i class="fa-solid fa-right-to-bracket"></i> Login to Admin
             </button>
         </form>
 
-        <div class="mt-6 text-center">
-            <p class="text-sm text-gray-600">Don't have an admin account?</p>
-            <a href="../create_admin.php" class="text-indigo-600 font-medium hover:underline">
-                Create one here
-            </a>
+        <div class="text-center text-xs text-base-content/60 pt-2 border-t border-base-200">
+            Need an admin account? <a href="../create_admin.php" class="link link-primary font-semibold">Create initial admin</a>
         </div>
     </div>
+
 </body>
 </html>

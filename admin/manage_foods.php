@@ -1,21 +1,14 @@
 <?php
-session_start();
-require_once __DIR__ . '/../includes/config.php';
-
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: login.php");
-    exit;
-}
+$pageTitle = "Manage Dishes";
+require_once __DIR__ . '/header.php';
 
 // Handle delete
 if (isset($_GET['delete_id'])) {
     $delete_id = intval($_GET['delete_id']);
     $conn->query("DELETE FROM foods WHERE id = $delete_id");
-    exit('deleted'); // For AJAX delete
+    header("Location: manage_foods.php?deleted=1");
+    exit;
 }
-
-// Get restaurants for dropdown
-$restaurants = $conn->query("SELECT id, name FROM restaurants ORDER BY name ASC");
 
 // Handle AJAX search + filter
 if (isset($_GET['ajax'])) {
@@ -35,18 +28,18 @@ if (isset($_GET['ajax'])) {
 
     $foods = $conn->query($query);
     if ($foods->num_rows === 0) {
-        echo '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No foods found.</td></tr>';
+        echo '<tr><td colspan="6" class="text-center text-base-content/60 py-4">No dishes found.</td></tr>';
     } else {
         while ($f = $foods->fetch_assoc()) {
             echo '<tr>
-                    <td class="px-6 py-4 whitespace-nowrap">'.htmlspecialchars($f['id']).'</td>
-                    <td class="px-6 py-4 whitespace-nowrap">'.htmlspecialchars($f['name']).'</td>
-                    <td class="px-6 py-4 whitespace-nowrap">'.htmlspecialchars($f['restaurant_name']).'</td>
-                    <td class="px-6 py-4 whitespace-nowrap">$'.number_format($f['price'],2).'</td>
-                    <td class="px-6 py-4 whitespace-nowrap">'.($f['is_active'] ? 'Active' : 'Inactive').'</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <a href="edit_food.php?id='.$f['id'].'" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                        <a href="javascript:void(0);" onclick="deleteFood('.$f['id'].')" class="text-red-600 hover:text-red-900">Delete</a>
+                    <td class="font-bold">#'.htmlspecialchars($f['id']).'</td>
+                    <td class="font-bold text-sm">'.htmlspecialchars($f['name']).'</td>
+                    <td>'.htmlspecialchars($f['restaurant_name']).'</td>
+                    <td class="font-extrabold text-primary">$'.number_format($f['price'],2).'</td>
+                    <td><span class="badge '.($f['is_active'] ? 'badge-success' : 'badge-ghost').' badge-sm font-bold">'.($f['is_active'] ? 'Active' : 'Inactive').'</span></td>
+                    <td class="text-right flex items-center justify-end gap-2">
+                        <a href="edit_food.php?id='.$f['id'].'" class="btn btn-ghost btn-xs text-primary"><i class="fa-solid fa-pen"></i> Edit</a>
+                        <a href="manage_foods.php?delete_id='.$f['id'].'" onclick="return confirm(\'Delete this dish?\');" class="btn btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i> Delete</a>
                     </td>
                 </tr>';
         }
@@ -54,7 +47,7 @@ if (isset($_GET['ajax'])) {
     exit;
 }
 
-// Initial page load
+$restaurants = $conn->query("SELECT id, name FROM restaurants ORDER BY name ASC");
 $foods = $conn->query("
     SELECT f.*, r.name AS restaurant_name
     FROM foods f
@@ -62,99 +55,105 @@ $foods = $conn->query("
     ORDER BY f.created_at DESC
 ");
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Manage Foods</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>body { font-family: 'Inter', sans-serif; }</style>
-</head>
-<body class="bg-gray-50 min-h-screen flex">
 
-<!-- Sidebar -->
-<aside class="bg-white shadow-lg w-64 flex-shrink-0 hidden md:flex flex-col">
-    <div class="p-6 border-b border-gray-200">
-        <h2 class="text-2xl font-bold text-indigo-600 text-center">Admin Panel</h2>
+<div class="space-y-6">
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold font-heading flex items-center gap-3">
+                <i class="fa-solid fa-burger text-primary"></i> Manage Dishes & Menu
+            </h1>
+            <p class="text-xs text-base-content/70">Add, edit, or toggle availability of menu items</p>
+        </div>
+        <a href="add_food.php" class="btn btn-primary btn-sm gap-2 shadow">
+            <i class="fa-solid fa-plus"></i> Add New Dish
+        </a>
     </div>
-    <nav class="flex-1 p-4 space-y-2">
-        <a href="dashboard.php" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">Dashboard</a>
-        <a href="manage_users.php" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">Manage Users</a>
-        <a href="manage_orders.php" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">Manage Orders</a>
-        <a href="manage_foods.php" class="block px-4 py-2 rounded-lg bg-indigo-50 text-indigo-600 font-semibold hover:bg-indigo-100">Manage Foods</a>
-        <a href="manage_restaurants.php" class="block px-4 py-2 rounded-lg hover:bg-gray-100 text-gray-700">Manage Restaurants</a>
-    </nav>
-    <div class="p-4">
-        <a href="logout.php" class="w-full block bg-red-500 hover:bg-red-600 text-white text-center py-2 rounded-full font-semibold transition-all">Logout</a>
-    </div>
-</aside>
 
-<!-- Main Content -->
-<div class="flex-1 flex flex-col">
-<nav class="bg-white shadow-md md:hidden flex justify-between items-center p-4">
-    <h1 class="text-xl font-bold text-indigo-600">Manage Foods</h1>
-    <a href="logout.php" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-full text-sm font-semibold">Logout</a>
-</nav>
+    <?php if (isset($_GET['deleted'])): ?>
+        <div class="alert alert-warning shadow-md text-xs">
+            <i class="fa-solid fa-trash-can"></i> Dish deleted successfully.
+        </div>
+    <?php endif; ?>
 
-<main class="flex-1 p-6 md:p-10">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Foods</h1>
+    <!-- Search & Restaurant Filter Bar -->
+    <div class="card bg-base-100 shadow-md border border-base-200 p-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+                <input type="text" id="search" placeholder="Search by dish name or restaurant..." class="input input-bordered w-full text-sm pl-10" />
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-base-content/40"></i>
+            </div>
 
-    <!-- Add Food Button and Search + Filter -->
-    <div class="flex flex-col sm:flex-row justify-between mb-4 gap-4">
-        <a href="add_food.php" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-semibold">Add New Food</a>
-
-        <input type="text" id="search" placeholder="Search by food or restaurant" class="flex-1 max-w-sm px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-
-        <select id="restaurant-filter" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <option value="0">All Restaurants</option>
-            <?php while($r = $restaurants->fetch_assoc()): ?>
-                <option value="<?= $r['id'] ?>"><?= htmlspecialchars($r['name']) ?></option>
-            <?php endwhile; ?>
-        </select>
+            <select id="restaurant-filter" class="select select-bordered text-sm">
+                <option value="0">All Restaurants</option>
+                <?php while ($r = $restaurants->fetch_assoc()): ?>
+                    <option value="<?= $r['id']; ?>"><?= htmlspecialchars($r['name']); ?></option>
+                <?php endwhile; ?>
+            </select>
+        </div>
     </div>
 
     <!-- Foods Table -->
-    <div class="overflow-x-auto bg-white shadow-lg rounded-xl">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody id="food-list" class="bg-white divide-y divide-gray-200">
-                <?php while($f = $foods->fetch_assoc()): ?>
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($f['id']) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($f['name']) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><?= htmlspecialchars($f['restaurant_name']) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap">$<?= number_format($f['price'], 2) ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap"><?= $f['is_active'] ? 'Active' : 'Inactive' ?></td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
-                        <a href="edit_food.php?id=<?= $f['id'] ?>" class="text-blue-600 hover:text-blue-900 mr-3">Edit</a>
-                        <a href="javascript:void(0);" onclick="deleteFood(<?= $f['id'] ?>)" class="text-red-600 hover:text-red-900">Delete</a>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
-                <?php if($foods->num_rows === 0): ?>
-                <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No foods found.</td>
-                </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+    <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full text-xs">
+                <thead>
+                    <tr class="font-bold uppercase bg-base-200">
+                        <th>ID</th>
+                        <th>Dish Name</th>
+                        <th>Restaurant</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th class="text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="food-list">
+                    <?php while ($f = $foods->fetch_assoc()): ?>
+                        <tr class="hover">
+                            <td class="font-bold">#<?= $f['id']; ?></td>
+                            <td class="font-bold text-sm"><?= htmlspecialchars($f['name']); ?></td>
+                            <td><?= htmlspecialchars($f['restaurant_name'] ?? 'Unassigned'); ?></td>
+                            <td class="font-extrabold text-primary">$<?= number_format($f['price'], 2); ?></td>
+                            <td>
+                                <span class="badge <?= $f['is_active'] ? 'badge-success' : 'badge-ghost'; ?> badge-sm font-bold">
+                                    <?= $f['is_active'] ? 'Active' : 'Inactive'; ?>
+                                </span>
+                            </td>
+                            <td class="text-right flex items-center justify-end gap-2">
+                                <a href="edit_food.php?id=<?= $f['id']; ?>" class="btn btn-ghost btn-xs text-primary" title="Edit">
+                                    <i class="fa-solid fa-pen"></i> Edit
+                                </a>
+                                <a href="manage_foods.php?delete_id=<?= $f['id']; ?>" onclick="return confirm('Delete this dish?');" class="btn btn-ghost btn-xs text-error" title="Delete">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                    <?php if ($foods->num_rows === 0): ?>
+                        <tr>
+                            <td colspan="6" class="text-center text-base-content/60 py-8">
+                                No dishes currently found. Click "Add New Dish" to add one!
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
-</main>
+
 </div>
 
-<script src="../assets/js/update.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    function filterFoods() {
+        const search = $('#search').val();
+        const restaurant_id = $('#restaurant-filter').val();
+        $.get('manage_foods.php', { ajax: 1, search: search, restaurant_id: restaurant_id }, function(data) {
+            $('#food-list').html(data);
+        });
+    }
+    $('#search').on('keyup', filterFoods);
+    $('#restaurant-filter').on('change', filterFoods);
+</script>
 
-
-</body>
-</html>
+<?php require_once __DIR__ . '/footer.php'; ?>

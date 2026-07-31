@@ -1,22 +1,17 @@
 <?php
-session_start();
-require_once 'includes/config.php';
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php?redirect=dish.php?id=" . urlencode($_GET['id']));
-    exit;
-}
-
-$user_id = $_SESSION['user_id'];
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     header("Location: index.php");
     exit;
 }
+
 $dish_id = intval($_GET['id']);
+require_once 'includes/config.php';
+
 $stmt = $conn->prepare("
-    SELECT f.*, r.name AS restaurant_name 
+    SELECT f.*, r.name AS restaurant_name, r.id AS restaurant_id 
     FROM foods f 
     JOIN restaurants r ON f.restaurant_id = r.id 
-    WHERE f.id=? AND f.is_active=1
+    WHERE f.id = ? AND f.is_active = 1
 ");
 $stmt->bind_param("i", $dish_id);
 $stmt->execute();
@@ -27,6 +22,10 @@ if (!$dish) {
     exit;
 }
 
+$pageTitle = htmlspecialchars($dish['name']) . " - Dish Details";
+require_once 'includes/header.php';
+
+// Handle Add to Cart
 if (isset($_POST['add_to_cart'])) {
     $quantity = max(1, intval($_POST['quantity']));
     if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
@@ -53,59 +52,201 @@ if (isset($_POST['add_to_cart'])) {
     header("Location: cart.php");
     exit;
 }
+
+// Handle Submit Dish Review
+if (isset($_POST['submit_dish_review'])) {
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: login.php?redirect=dish.php?id=" . $dish_id);
+        exit;
+    }
+    $user_id = $_SESSION['user_id'];
+    $rating = max(1, min(5, intval($_POST['rating'] ?? 5)));
+    $comment = trim($_POST['comment'] ?? '');
+
+    $stmt_rev = $conn->prepare("INSERT INTO reviews (user_id, food_id, rating, comment) VALUES (?, ?, ?, ?)");
+    $stmt_rev->bind_param("iiis", $user_id, $dish_id, $rating, $comment);
+    $stmt_rev->execute();
+    $review_msg = "Thank you for your rating & review on this dish!";
+}
+
+// Fetch Reviews for Dish
+$stmt_d_rev = $conn->prepare("
+    SELECT r.*, u.name as user_name 
+    FROM reviews r 
+    JOIN users u ON r.user_id = u.id 
+    WHERE r.food_id = ? 
+    ORDER BY r.created_at DESC
+");
+$stmt_d_rev->bind_param("i", $dish_id);
+$stmt_d_rev->execute();
+$reviews = $stmt_d_rev->get_result();
+
+$food_rating = get_food_rating($conn, $dish_id);
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($dish['name']); ?> - Dish Details</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
 
-<body class="min-h-screen bg-gradient-to-br from-amber-100 via-orange-200 to-red-100 flex items-center justify-center px-4 py-10">
+<div class="container mx-auto px-4 py-10 max-w-6xl space-y-10">
 
-    <div class="max-w-5xl w-full bg-white/70 backdrop-blur-md rounded-2xl shadow-2xl overflow-hidden grid md:grid-cols-2">
-        <!-- Image Section -->
-        <div class="relative">
-            <img src="<?= !empty($dish['image_url']) ? htmlspecialchars($dish['image_url']) : 'https://via.placeholder.com/500x400?text=No+Image'; ?>"
-                 alt="<?= htmlspecialchars($dish['name']); ?>"
-                 class="object-cover w-full h-full">
-            <div class="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded-lg text-sm">
-                <?= htmlspecialchars($dish['restaurant_name']); ?>
-            </div>
+    <!-- Breadcrumb Nav -->
+    <div class="text-sm breadcrumbs">
+        <ul>
+            <li><a href="index.php"><i class="fa-solid fa-house text-primary mr-1"></i> Home</a></li>
+            <li><a href="restaurant.php?id=<?= $dish['restaurant_id']; ?>"><?= htmlspecialchars($dish['restaurant_name']); ?></a></li>
+            <li class="font-bold text-primary"><?= htmlspecialchars($dish['name']); ?></li>
+        </ul>
+    </div>
+
+    <?php if (isset($review_msg)): ?>
+        <div class="alert alert-success shadow-md">
+            <i class="fa-solid fa-star text-lg text-warning"></i>
+            <span><?= $review_msg; ?></span>
         </div>
+    <?php endif; ?>
 
-        <div class="p-8 flex flex-col justify-between">
+    <!-- Main Dish Card Section -->
+    <div class="card lg:card-side bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+        <figure class="lg:w-1/2 relative min-h-[340px] bg-base-300">
+            <img src="<?= !empty($dish['image_url']) ? htmlspecialchars($dish['image_url']) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'; ?>" 
+                 alt="<?= htmlspecialchars($dish['name']); ?>" 
+                 class="w-full h-full object-cover" />
+            <div class="absolute top-4 left-4">
+                <span class="badge badge-accent font-semibold shadow"><?= htmlspecialchars($dish['category'] ?? 'Main Dish'); ?></span>
+            </div>
+        </figure>
+        
+        <div class="card-body lg:w-1/2 p-8 justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2"><?= htmlspecialchars($dish['name']); ?></h1>
-                <p class="text-gray-600 text-sm mb-4"><?= htmlspecialchars($dish['description']); ?></p>
-                <p class="text-2xl font-semibold text-amber-600 mb-6">$<?= number_format($dish['price'], 2); ?></p>
+                <a href="restaurant.php?id=<?= $dish['restaurant_id']; ?>" class="text-xs text-secondary font-bold uppercase tracking-wider hover:underline">
+                    <i class="fa-solid fa-store mr-1"></i> <?= htmlspecialchars($dish['restaurant_name']); ?>
+                </a>
+                
+                <h1 class="card-title text-3xl font-extrabold font-heading mt-1 mb-2">
+                    <?= htmlspecialchars($dish['name']); ?>
+                </h1>
 
-                <form method="POST" class="space-y-4">
+                <!-- Rating Stats -->
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="flex text-warning text-sm">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <i class="<?= $i <= round($food_rating['avg']) ? 'fa-solid' : 'fa-regular'; ?> fa-star"></i>
+                        <?php endfor; ?>
+                    </div>
+                    <span class="font-bold text-sm"><?= $food_rating['avg']; ?></span>
+                    <span class="text-xs text-base-content/60">(<?= $food_rating['count']; ?> Customer Reviews)</span>
+                </div>
+
+                <p class="text-base-content/80 text-sm leading-relaxed mb-6">
+                    <?= htmlspecialchars($dish['description']); ?>
+                </p>
+
+                <div class="bg-base-200 p-4 rounded-2xl flex items-center justify-between mb-6">
                     <div>
-                        <label for="quantity" class="block text-gray-700 font-medium mb-1">Quantity</label>
-                        <input type="number" id="quantity" name="quantity" value="1" min="1"
-                               class="w-24 border border-gray-300 rounded-lg px-3 py-2 text-center focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <span class="text-xs text-base-content/60 block font-medium">Unit Price</span>
+                        <span class="text-3xl font-extrabold text-primary font-heading">$<?= number_format($dish['price'], 2); ?></span>
+                    </div>
+                    <div class="badge badge-success gap-1 text-xs">
+                        <i class="fa-solid fa-circle-check"></i> In Stock
+                    </div>
+                </div>
+
+                <!-- Add to Cart Form -->
+                <form method="POST" class="space-y-4">
+                    <div class="form-control w-32">
+                        <label class="label text-xs font-bold">Select Quantity</label>
+                        <div class="join border border-base-300 rounded-lg">
+                            <input type="number" name="quantity" value="1" min="1" max="50" class="input input-sm join-item w-full text-center font-bold focus:outline-none" />
+                        </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <button type="submit" name="add_to_cart"
-                                class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg transition duration-200 shadow-md hover:shadow-lg">
-                            Add to Cart
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" name="add_to_cart" class="btn btn-primary flex-1 shadow-lg gap-2">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart
                         </button>
-                        <a href="index.php"
-                           class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-lg text-center transition duration-200">
-                            ← Back
+                        <a href="restaurant.php?id=<?= $dish['restaurant_id']; ?>" class="btn btn-ghost">
+                            View Menu
                         </a>
                     </div>
                 </form>
             </div>
-
-            <div class="mt-6 border-t pt-4 text-sm text-gray-500 text-center">
-                © <?= date('Y'); ?> <span class="font-semibold">VOID</span>. All rights reserved.
-            </div>
         </div>
     </div>
 
-</body>
-</html>
+    <!-- Reviews Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
+        <!-- Review Submission -->
+        <div class="lg:col-span-1">
+            <div class="card bg-base-100 shadow-md border border-base-200 p-6">
+                <h3 class="text-lg font-bold font-heading mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-primary"></i> Rate this Dish
+                </h3>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <form method="POST" class="space-y-4">
+                        <div>
+                            <label class="label text-xs font-semibold">Your Rating</label>
+                            <div class="rating rating-lg gap-1">
+                                <input type="radio" name="rating" value="1" class="mask mask-star-2 bg-warning" />
+                                <input type="radio" name="rating" value="2" class="mask mask-star-2 bg-warning" />
+                                <input type="radio" name="rating" value="3" class="mask mask-star-2 bg-warning" />
+                                <input type="radio" name="rating" value="4" class="mask mask-star-2 bg-warning" />
+                                <input type="radio" name="rating" value="5" class="mask mask-star-2 bg-warning" checked />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="label text-xs font-semibold">Write your Review</label>
+                            <textarea name="comment" rows="3" required placeholder="How did you like the taste and quality?" class="textarea textarea-bordered w-full text-sm"></textarea>
+                        </div>
+                        <button type="submit" name="submit_dish_review" class="btn btn-primary btn-block shadow-md">
+                            Submit Dish Review
+                        </button>
+                    </form>
+                <?php else: ?>
+                    <div class="bg-base-200 p-4 rounded-xl text-center space-y-3">
+                        <p class="text-xs text-base-content/70">Login to leave a review for this dish.</p>
+                        <a href="login.php?redirect=dish.php?id=<?= $dish_id; ?>" class="btn btn-primary btn-sm btn-block">Login to Review</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Customer Reviews List -->
+        <div class="lg:col-span-2 space-y-4">
+            <h3 class="text-xl font-bold font-heading flex items-center gap-2">
+                <i class="fa-solid fa-comments text-secondary"></i> Customer Reviews (<?= $reviews->num_rows; ?>)
+            </h3>
+            
+            <?php if ($reviews->num_rows > 0): ?>
+                <div class="space-y-3">
+                    <?php while ($rev = $reviews->fetch_assoc()): ?>
+                        <div class="card bg-base-100 shadow-xs border border-base-200 p-4">
+                            <div class="flex justify-between items-start">
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder">
+                                        <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                            <span class="text-xs"><?= strtoupper(substr($rev['user_name'], 0, 1)); ?></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-sm"><?= htmlspecialchars($rev['user_name']); ?></h4>
+                                        <span class="text-xs text-base-content/50"><?= date('d M Y', strtotime($rev['created_at'])); ?></span>
+                                    </div>
+                                </div>
+                                <div class="flex text-warning text-xs gap-1">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <i class="<?= $i <= $rev['rating'] ? 'fa-solid' : 'fa-regular'; ?> fa-star"></i>
+                                    <?php endfor; ?>
+                                </div>
+                            </div>
+                            <p class="text-xs text-base-content/80 mt-3"><?= htmlspecialchars($rev['comment']); ?></p>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-ghost bg-base-100 border border-base-200">
+                    <span class="text-xs text-base-content/70">No reviews yet for this dish. Be the first to leave a review!</span>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</div>
+
+<?php require_once 'includes/footer.php'; ?>
