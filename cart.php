@@ -81,6 +81,22 @@ require_once 'includes/header.php';
         </div>
     <?php endif; ?>
 
+    <!-- Clear Cart DaisyUI Modal -->
+    <dialog id="clear_cart_modal" class="modal">
+        <div class="modal-box bg-base-100 p-6 text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-error/10 text-error flex items-center justify-center text-3xl mx-auto">
+                <i class="fa-solid fa-trash"></i>
+            </div>
+            <h3 class="text-xl font-bold font-heading">Clear Entire Cart?</h3>
+            <p class="text-xs text-base-content/70">Are you sure you want to remove all items from your shopping cart? This action cannot be undone.</p>
+            <div class="flex gap-3 pt-2">
+                <a href="cart.php?action=clear" class="btn btn-error text-white flex-1">Yes, Clear Cart</a>
+                <form method="dialog" class="flex-1"><button class="btn btn-ghost w-full">Cancel</button></form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+    </dialog>
+
     <?php if (!empty($_SESSION['cart'])): ?>
         <form method="POST" action="cart.php?action=update">
             <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden mb-8">
@@ -120,9 +136,22 @@ require_once 'includes/header.php';
                                         $<?= number_format($item['price'] * $item['quantity'], 2); ?>
                                     </td>
                                     <td class="text-right">
-                                        <a href="cart.php?action=remove&id=<?= $item['id']; ?>" class="btn btn-ghost btn-circle btn-sm text-error" title="Remove Item">
+                                        <button type="button" onclick="remove_modal_<?= $item['id']; ?>.showModal()" class="btn btn-ghost btn-circle btn-sm text-error" title="Remove Item Modal">
                                             <i class="fa-solid fa-trash-can"></i>
-                                        </a>
+                                        </button>
+
+                                        <!-- Remove Item Modal -->
+                                        <dialog id="remove_modal_<?= $item['id']; ?>" class="modal">
+                                            <div class="modal-box bg-base-100 p-6 text-center space-y-3">
+                                                <h3 class="text-lg font-bold font-heading">Remove Item?</h3>
+                                                <p class="text-xs text-base-content/70">Remove "<?= htmlspecialchars($item['name']); ?>" from your cart?</p>
+                                                <div class="flex gap-2 pt-2">
+                                                    <a href="cart.php?action=remove&id=<?= $item['id']; ?>" class="btn btn-error btn-sm text-white flex-1">Remove</a>
+                                                    <form method="dialog" class="flex-1"><button class="btn btn-ghost btn-sm w-full">Cancel</button></form>
+                                                </div>
+                                            </div>
+                                            <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+                                        </dialog>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -137,9 +166,9 @@ require_once 'includes/header.php';
                     <button type="submit" class="btn btn-outline btn-sm gap-2">
                         <i class="fa-solid fa-arrows-rotate"></i> Update Cart
                     </button>
-                    <a href="cart.php?action=clear" onclick="return confirm('Clear all items from your cart?');" class="btn btn-ghost btn-sm text-error gap-2">
-                        <i class="fa-solid fa-trash"></i> Clear Cart
-                    </a>
+                    <button type="button" onclick="clear_cart_modal.showModal()" class="btn btn-ghost btn-sm text-error gap-2">
+                        <i class="fa-solid fa-trash"></i> Clear Cart Modal
+                    </button>
                 </div>
 
                 <div class="text-right w-full md:w-auto">

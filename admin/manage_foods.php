@@ -39,7 +39,7 @@ if (isset($_GET['ajax'])) {
                     <td><span class="badge '.($f['is_active'] ? 'badge-success' : 'badge-ghost').' badge-sm font-bold">'.($f['is_active'] ? 'Active' : 'Inactive').'</span></td>
                     <td class="text-right flex items-center justify-end gap-2">
                         <a href="edit_food.php?id='.$f['id'].'" class="btn btn-ghost btn-xs text-primary"><i class="fa-solid fa-pen"></i> Edit</a>
-                        <a href="manage_foods.php?delete_id='.$f['id'].'" onclick="return confirm(\'Delete this dish?\');" class="btn btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i> Delete</a>
+                        <button type="button" onclick="delete_food_modal_'.$f['id'].'.showModal()" class="btn btn-ghost btn-xs text-error"><i class="fa-solid fa-trash"></i> Delete</button>
                     </td>
                 </tr>';
         }
@@ -123,9 +123,25 @@ $foods = $conn->query("
                                 <a href="edit_food.php?id=<?= $f['id']; ?>" class="btn btn-ghost btn-xs text-primary" title="Edit">
                                     <i class="fa-solid fa-pen"></i> Edit
                                 </a>
-                                <a href="manage_foods.php?delete_id=<?= $f['id']; ?>" onclick="return confirm('Delete this dish?');" class="btn btn-ghost btn-xs text-error" title="Delete">
+                                <button type="button" onclick="delete_food_modal_<?= $f['id']; ?>.showModal()" class="btn btn-ghost btn-xs text-error" title="Delete Modal">
                                     <i class="fa-solid fa-trash"></i> Delete
-                                </a>
+                                </button>
+
+                                <!-- Delete Dish Confirmation DaisyUI Modal -->
+                                <dialog id="delete_food_modal_<?= $f['id']; ?>" class="modal text-left">
+                                    <div class="modal-box bg-base-100 p-6 text-center space-y-3">
+                                        <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center text-xl mx-auto">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                        </div>
+                                        <h3 class="text-lg font-bold font-heading">Delete Dish?</h3>
+                                        <p class="text-xs text-base-content/70">Are you sure you want to delete "<strong><?= htmlspecialchars($f['name']); ?></strong>"? This action cannot be undone.</p>
+                                        <div class="flex gap-2 pt-2">
+                                            <a href="manage_foods.php?delete_id=<?= $f['id']; ?>" class="btn btn-error btn-sm text-white flex-1">Delete Dish</a>
+                                            <form method="dialog" class="flex-1"><button class="btn btn-ghost btn-sm w-full">Cancel</button></form>
+                                        </div>
+                                    </div>
+                                    <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+                                </dialog>
                             </td>
                         </tr>
                     <?php endwhile; ?>

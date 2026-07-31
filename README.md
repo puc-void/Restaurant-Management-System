@@ -12,7 +12,7 @@
 ## ✨ Features Breakdown
 
 ### 🛍️ Customer Front-End Portal
-* **DaisyUI Modern Design System**: Built with modern typography, smooth glassmorphism, responsive cards, and dynamic components.
+* **DaisyUI Modern Design & Modal Popups**: Built with modern typography, smooth glassmorphism, responsive cards, and **interactive DaisyUI `<dialog>` modals / popups** across all features (Quick Dish View, Review Submissions, Cart Confirmations, and Admin Actions).
 * **Multi-Theme Switcher**: Live theme switching with persistence in `localStorage` supporting **Emerald** (Default), **Light**, **Dark**, **Cupcake**, **Synthwave**, **Cyberpunk**, and **Retro**.
 * **Category & Cuisine Filter Bar**: Instant filtering for Fast Food, Italian, Indian, Asian, Pizza, Desserts, and Beverages.
 * **Star Ratings & Customer Reviews**: 1–5 star ratings and feedback for dishes and partner restaurants with calculated average rating badges.

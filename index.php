@@ -2,9 +2,10 @@
 $pageTitle = "GourmetHub - Discover & Order Best Food";
 require_once 'includes/header.php';
 
-// Handle quick add to cart from index page
+// Handle quick add to cart from index page or modal
 if (isset($_POST['quick_add_to_cart'])) {
     $food_id = intval($_POST['food_id']);
+    $qty = max(1, intval($_POST['quantity'] ?? 1));
     $stmt_f = $conn->prepare("SELECT f.*, r.name as restaurant_name FROM foods f JOIN restaurants r ON f.restaurant_id = r.id WHERE f.id = ? AND f.is_active = 1");
     $stmt_f->bind_param("i", $food_id);
     $stmt_f->execute();
@@ -15,7 +16,7 @@ if (isset($_POST['quick_add_to_cart'])) {
         $found = false;
         foreach ($_SESSION['cart'] as &$item) {
             if ($item['id'] == $food_id) {
-                $item['quantity'] += 1;
+                $item['quantity'] += $qty;
                 $found = true;
                 break;
             }
@@ -26,10 +27,10 @@ if (isset($_POST['quick_add_to_cart'])) {
                 'name' => $f_item['name'],
                 'price' => $f_item['price'],
                 'image' => $f_item['image_url'],
-                'quantity' => 1
+                'quantity' => $qty
             ];
         }
-        $quick_added_msg = "Added '" . htmlspecialchars($f_item['name']) . "' to cart!";
+        $quick_added_msg = "Added " . $qty . "x '" . htmlspecialchars($f_item['name']) . "' to your cart!";
     }
 }
 
@@ -274,9 +275,9 @@ $categories = ['All', 'Fast Food', 'Italian', 'Indian', 'Asian', 'Pizza', 'Desse
                                 <span class="text-lg font-extrabold text-primary font-heading">$<?= number_format($d['price'], 2); ?></span>
                             </div>
                             <div class="flex gap-2">
-                                <a href="dish.php?id=<?= $d['id']; ?>" class="btn btn-ghost btn-circle btn-sm" title="View Details">
-                                    <i class="fa-solid fa-eye text-base-content/70"></i>
-                                </a>
+                                <button type="button" onclick="dish_modal_<?= $d['id']; ?>.showModal()" class="btn btn-ghost btn-circle btn-sm" title="Quick View Modal">
+                                    <i class="fa-solid fa-expand text-base-content/70"></i>
+                                </button>
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="food_id" value="<?= $d['id']; ?>">
                                     <button type="submit" name="quick_add_to_cart" class="btn btn-primary btn-sm rounded-lg shadow-sm gap-1">
@@ -286,6 +287,67 @@ $categories = ['All', 'Fast Food', 'Italian', 'Indian', 'Asian', 'Pizza', 'Desse
                             </div>
                         </div>
                     </div>
+
+                    <!-- DaisyUI Quick View Dish Modal -->
+                    <dialog id="dish_modal_<?= $d['id']; ?>" class="modal">
+                        <div class="modal-box max-w-lg p-0 overflow-hidden bg-base-100">
+                            <form method="dialog">
+                                <button class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-20 text-white bg-black/50 hover:bg-black/80 border-none">✕</button>
+                            </form>
+                            
+                            <div class="relative h-56 bg-base-300">
+                                <img src="<?= !empty($d['image_url']) ? htmlspecialchars($d['image_url']) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'; ?>" 
+                                     alt="<?= htmlspecialchars($d['name']); ?>" 
+                                     class="w-full h-full object-cover" />
+                                <div class="absolute bottom-3 left-3">
+                                    <span class="badge badge-accent font-semibold shadow"><?= htmlspecialchars($d['category'] ?? 'Main Dish'); ?></span>
+                                </div>
+                            </div>
+
+                            <div class="p-6 space-y-4">
+                                <span class="text-xs text-secondary font-bold uppercase tracking-wider">
+                                    <i class="fa-solid fa-store mr-1"></i> <?= htmlspecialchars($d['restaurant_name']); ?>
+                                </span>
+                                
+                                <h3 class="text-2xl font-bold font-heading"><?= htmlspecialchars($d['name']); ?></h3>
+                                
+                                <div class="flex items-center gap-2">
+                                    <div class="flex text-warning text-xs">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <i class="<?= $i <= round($food_rating['avg']) ? 'fa-solid' : 'fa-regular'; ?> fa-star"></i>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <span class="font-bold text-sm"><?= $food_rating['avg']; ?></span>
+                                    <span class="text-xs text-base-content/60">(<?= $food_rating['count']; ?> Customer Reviews)</span>
+                                </div>
+
+                                <p class="text-xs text-base-content/80 leading-relaxed"><?= htmlspecialchars($d['description']); ?></p>
+
+                                <form method="POST" class="pt-4 border-t border-base-200 space-y-4">
+                                    <input type="hidden" name="food_id" value="<?= $d['id']; ?>">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <span class="text-xs text-base-content/60 block">Price</span>
+                                            <span class="text-2xl font-extrabold text-primary font-heading">$<?= number_format($d['price'], 2); ?></span>
+                                        </div>
+                                        <div class="form-control w-28">
+                                            <label class="label text-[10px] font-bold py-1">Quantity</label>
+                                            <input type="number" name="quantity" value="1" min="1" max="50" class="input input-sm input-bordered text-center font-bold" />
+                                        </div>
+                                    </div>
+
+                                    <div class="flex gap-2">
+                                        <button type="submit" name="quick_add_to_cart" class="btn btn-primary btn-block shadow-lg gap-2">
+                                            <i class="fa-solid fa-cart-plus"></i> Add to Cart Now
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <form method="dialog" class="modal-backdrop bg-neutral/60">
+                            <button>close</button>
+                        </form>
+                    </dialog>
                 <?php endwhile; ?>
             </div>
         <?php else: ?>

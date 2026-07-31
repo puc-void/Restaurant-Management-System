@@ -57,9 +57,25 @@ $users = $conn->query("SELECT * FROM users ORDER BY created_at DESC");
                                 <a href="edit_user.php?id=<?= $user['id']; ?>" class="btn btn-ghost btn-xs text-primary" title="Edit">
                                     <i class="fa-solid fa-user-pen"></i> Edit
                                 </a>
-                                <a href="manage_users.php?delete_id=<?= $user['id']; ?>" onclick="return confirm('Are you sure you want to delete this user account?');" class="btn btn-ghost btn-xs text-error" title="Delete">
+                                <button type="button" onclick="delete_user_modal_<?= $user['id']; ?>.showModal()" class="btn btn-ghost btn-xs text-error" title="Delete Modal">
                                     <i class="fa-solid fa-user-xmark"></i> Delete
-                                </a>
+                                </button>
+
+                                <!-- Delete User Confirmation DaisyUI Modal -->
+                                <dialog id="delete_user_modal_<?= $user['id']; ?>" class="modal text-left">
+                                    <div class="modal-box bg-base-100 p-6 text-center space-y-3">
+                                        <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center text-xl mx-auto">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                        </div>
+                                        <h3 class="text-lg font-bold font-heading">Delete User Account?</h3>
+                                        <p class="text-xs text-base-content/70">Delete customer account for "<strong><?= htmlspecialchars($user['name']); ?></strong>"?</p>
+                                        <div class="flex gap-2 pt-2">
+                                            <a href="manage_users.php?delete_id=<?= $user['id']; ?>" class="btn btn-error btn-sm text-white flex-1">Delete User</a>
+                                            <form method="dialog" class="flex-1"><button class="btn btn-ghost btn-sm w-full">Cancel</button></form>
+                                        </div>
+                                    </div>
+                                    <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+                                </dialog>
                             </td>
                         </tr>
                     <?php endwhile; ?>

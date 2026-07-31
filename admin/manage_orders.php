@@ -2,6 +2,19 @@
 $pageTitle = "Manage Orders";
 require_once __DIR__ . '/header.php';
 
+// Handle quick status update POST
+if (isset($_POST['update_quick_status'])) {
+    $ord_id = intval($_POST['order_id']);
+    $n_status = $_POST['status'];
+    $allowed_status = ['Pending', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
+    if (in_array($n_status, $allowed_status)) {
+        $stmt_u = $conn->prepare("UPDATE orders SET status = ? WHERE id = ?");
+        $stmt_u->bind_param("si", $n_status, $ord_id);
+        $stmt_u->execute();
+        $updated_msg = "Order #$ord_id status updated to '$n_status'!";
+    }
+}
+
 $search = $_GET['search'] ?? '';
 $status_filter = $_GET['status'] ?? '';
 
@@ -50,6 +63,13 @@ $result = $stmt->get_result();
         </div>
     </div>
 
+    <?php if (isset($updated_msg)): ?>
+        <div class="alert alert-success shadow-md text-xs">
+            <i class="fa-solid fa-circle-check text-lg"></i>
+            <span><?= htmlspecialchars($updated_msg); ?></span>
+        </div>
+    <?php endif; ?>
+
     <!-- Filters & Search Form -->
     <form method="GET" class="card bg-base-100 shadow-md border border-base-200 p-4">
         <div class="flex flex-col sm:flex-row gap-3">
@@ -88,7 +108,7 @@ $result = $stmt->get_result();
                         <th>Total Amount</th>
                         <th>Status</th>
                         <th>Order Date</th>
-                        <th class="text-right">Action</th>
+                        <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -114,10 +134,39 @@ $result = $stmt->get_result();
                                     <span class="badge <?= $badgeClass; ?> font-bold text-xs"><?= htmlspecialchars($order['status']); ?></span>
                                 </td>
                                 <td class="text-base-content/70"><?= date('d M Y, H:i', strtotime($order['created_at'])); ?></td>
-                                <td class="text-right">
+                                <td class="text-right flex items-center justify-end gap-1">
+                                    <button type="button" onclick="status_modal_<?= $order['order_id']; ?>.showModal()" class="btn btn-ghost btn-xs text-info gap-1" title="Quick Update Status Modal">
+                                        <i class="fa-solid fa-pen"></i> Status
+                                    </button>
                                     <a href="order_details.php?id=<?= $order['order_id']; ?>" class="btn btn-primary btn-xs gap-1 shadow-sm">
-                                        <i class="fa-solid fa-eye"></i> View Details
+                                        <i class="fa-solid fa-eye"></i> Details
                                     </a>
+
+                                    <!-- Quick Order Status Update Modal -->
+                                    <dialog id="status_modal_<?= $order['order_id']; ?>" class="modal text-left">
+                                        <div class="modal-box bg-base-100 p-6 space-y-4">
+                                            <form method="dialog">
+                                                <button class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3">✕</button>
+                                            </form>
+                                            <h3 class="text-lg font-bold font-heading">Update Status for Order #<?= $order['order_id']; ?></h3>
+                                            
+                                            <form method="POST" class="space-y-4">
+                                                <input type="hidden" name="order_id" value="<?= $order['order_id']; ?>">
+                                                <div class="form-control">
+                                                    <label class="label text-xs font-bold">Select New Status</label>
+                                                    <select name="status" class="select select-bordered text-sm font-bold">
+                                                        <?php foreach ($allowed_status as $st): ?>
+                                                            <option value="<?= $st; ?>" <?= $order['status'] === $st ? 'selected' : ''; ?>><?= $st; ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <button type="submit" name="update_quick_status" class="btn btn-primary btn-block shadow-md">
+                                                    Save Status Change
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+                                    </dialog>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
