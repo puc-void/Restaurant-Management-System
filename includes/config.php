@@ -1,4 +1,10 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/functions.php';
+
 $host = "localhost";      // Usually localhost for XAMPP
 $db   = "online_food";    // Your database name
 $user = "root";           // Default XAMPP MySQL user

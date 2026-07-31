@@ -79,6 +79,10 @@ require_once 'includes/header.php';
         <div class="alert alert-info shadow-md mb-6">
             <i class="fa-solid fa-arrows-rotate"></i> Cart updated successfully.
         </div>
+    <?php elseif (isset($_GET['error']) && $_GET['error'] === 'empty'): ?>
+        <div class="alert alert-warning shadow-md mb-6">
+            <i class="fa-solid fa-triangle-exclamation"></i> Your cart is empty. Please add items before checking out.
+        </div>
     <?php endif; ?>
 
     <!-- Clear Cart DaisyUI Modal -->
@@ -98,6 +102,7 @@ require_once 'includes/header.php';
     </dialog>
 
     <?php if (!empty($_SESSION['cart'])): ?>
+        <!-- Cart Form -->
         <form method="POST" action="cart.php?action=update">
             <div class="card bg-base-100 shadow-xl border border-base-200 overflow-hidden mb-8">
                 <div class="overflow-x-auto">
@@ -117,8 +122,10 @@ require_once 'includes/header.php';
                                 <tr class="hover">
                                     <td>
                                         <div class="avatar">
-                                            <div class="w-14 h-14 rounded-xl">
-                                                <img src="<?= htmlspecialchars($item['image']); ?>" alt="<?= htmlspecialchars($item['name']); ?>" />
+                                            <div class="w-14 h-14 rounded-xl overflow-hidden bg-base-300">
+                                                <img src="<?= !empty($item['image']) ? htmlspecialchars($item['image']) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'; ?>" 
+                                                     alt="<?= htmlspecialchars($item['name']); ?>" 
+                                                     class="w-full h-full object-cover" />
                                             </div>
                                         </div>
                                     </td>
@@ -136,22 +143,9 @@ require_once 'includes/header.php';
                                         $<?= number_format($item['price'] * $item['quantity'], 2); ?>
                                     </td>
                                     <td class="text-right">
-                                        <button type="button" onclick="remove_modal_<?= $item['id']; ?>.showModal()" class="btn btn-ghost btn-circle btn-sm text-error" title="Remove Item Modal">
+                                        <button type="button" onclick="document.getElementById('remove_modal_<?= $item['id']; ?>').showModal()" class="btn btn-ghost btn-circle btn-sm text-error" title="Remove Item">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
-
-                                        <!-- Remove Item Modal -->
-                                        <dialog id="remove_modal_<?= $item['id']; ?>" class="modal">
-                                            <div class="modal-box bg-base-100 p-6 text-center space-y-3">
-                                                <h3 class="text-lg font-bold font-heading">Remove Item?</h3>
-                                                <p class="text-xs text-base-content/70">Remove "<?= htmlspecialchars($item['name']); ?>" from your cart?</p>
-                                                <div class="flex gap-2 pt-2">
-                                                    <a href="cart.php?action=remove&id=<?= $item['id']; ?>" class="btn btn-error btn-sm text-white flex-1">Remove</a>
-                                                    <form method="dialog" class="flex-1"><button class="btn btn-ghost btn-sm w-full">Cancel</button></form>
-                                                </div>
-                                            </div>
-                                            <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
-                                        </dialog>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -166,8 +160,8 @@ require_once 'includes/header.php';
                     <button type="submit" class="btn btn-outline btn-sm gap-2">
                         <i class="fa-solid fa-arrows-rotate"></i> Update Cart
                     </button>
-                    <button type="button" onclick="clear_cart_modal.showModal()" class="btn btn-ghost btn-sm text-error gap-2">
-                        <i class="fa-solid fa-trash"></i> Clear Cart Modal
+                    <button type="button" onclick="document.getElementById('clear_cart_modal').showModal()" class="btn btn-ghost btn-sm text-error gap-2">
+                        <i class="fa-solid fa-trash"></i> Clear Cart
                     </button>
                 </div>
 
@@ -180,6 +174,25 @@ require_once 'includes/header.php';
                 </div>
             </div>
         </form>
+
+        <!-- Remove Item Modals (Outside the main update form to avoid nested HTML form tags) -->
+        <?php foreach ($_SESSION['cart'] as $item): ?>
+            <dialog id="remove_modal_<?= $item['id']; ?>" class="modal">
+                <div class="modal-box bg-base-100 p-6 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-error/10 text-error flex items-center justify-center text-xl mx-auto">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </div>
+                    <h3 class="text-lg font-bold font-heading">Remove Item?</h3>
+                    <p class="text-xs text-base-content/70">Are you sure you want to remove "<strong><?= htmlspecialchars($item['name']); ?></strong>" from your cart?</p>
+                    <div class="flex gap-2 pt-2">
+                        <a href="cart.php?action=remove&id=<?= $item['id']; ?>" class="btn btn-error btn-sm text-white flex-1">Remove Item</a>
+                        <form method="dialog" class="flex-1"><button class="btn btn-ghost btn-sm w-full">Cancel</button></form>
+                    </div>
+                </div>
+                <form method="dialog" class="modal-backdrop bg-neutral/60"><button>close</button></form>
+            </dialog>
+        <?php endforeach; ?>
+
     <?php else: ?>
         <div class="card bg-base-100 shadow-xl border border-base-200 text-center p-12 space-y-4">
             <div class="w-20 h-20 rounded-full bg-base-200 text-base-content/40 flex items-center justify-center text-4xl mx-auto">

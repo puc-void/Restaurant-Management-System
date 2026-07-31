@@ -1,14 +1,14 @@
 <?php
 $pageTitle = "Login - GourmetHub";
 require_once 'includes/config.php';
+
+$redirect = $_GET['redirect'] ?? 'index.php';
 $error = '';
 
 if (isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+    header("Location: " . $redirect);
     exit;
 }
-
-$redirect = $_GET['redirect'] ?? 'index.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = trim($_POST['email']);

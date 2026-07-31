@@ -21,41 +21,38 @@ $user_stmt->bind_param("i", $user_id);
 $user_stmt->execute();
 $user = $user_stmt->get_result()->fetch_assoc();
 
-// Verification AJAX code
-if (isset($_POST['action']) && $_POST['action'] === 'send_code') {
-    $number = $_POST['number'];
-    $code = rand(100000, 999999);
-    $_SESSION['verify_code'] = $code;
-    $_SESSION['verify_number'] = $number;
-    echo json_encode(['success' => true, 'message' => "Verification code sent to $number", 'code' => $code]);
-    exit;
-}
-
-if (isset($_POST['action']) && $_POST['action'] === 'verify_code') {
-    $input_code = $_POST['code'];
-    if (isset($_SESSION['verify_code']) && $input_code == $_SESSION['verify_code']) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Invalid verification code']);
-    }
-    exit;
-}
-
 // Place Order
 if (isset($_POST['place_order'])) {
     $payment_method = $_POST['payment_method'] ?? 'Cash on Delivery';
-    $payment_number = $_POST['payment_number'] ?? null;
+    $payment_number = !empty($_POST['payment_number']) ? trim($_POST['payment_number']) : null;
     $shipping_address = trim($_POST['shipping_address'] ?? ($user['address'] ?? ''));
 
-    $stmt_order = $conn->prepare("INSERT INTO orders (user_id, total, status, payment_method, payment_number, shipping_address) VALUES (?, ?, 'Pending', ?, ?, ?)");
-    $stmt_order->bind_param("idsss", $user_id, $total, $payment_method, $payment_number, $shipping_address);
-    $stmt_order->execute();
-    $order_id = $stmt_order->insert_id;
+    $order_id = 0;
+    try {
+        $stmt_order = $conn->prepare("INSERT INTO orders (user_id, total, status, payment_method, payment_number, shipping_address) VALUES (?, ?, 'Pending', ?, ?, ?)");
+        if ($stmt_order) {
+            $stmt_order->bind_param("idsss", $user_id, $total, $payment_method, $payment_number, $shipping_address);
+            $stmt_order->execute();
+            $order_id = $stmt_order->insert_id;
+        } else {
+            $stmt_order = $conn->prepare("INSERT INTO orders (user_id, total, status, payment_method, payment_number) VALUES (?, ?, 'Pending', ?, ?)");
+            $stmt_order->bind_param("idss", $user_id, $total, $payment_method, $payment_number);
+            $stmt_order->execute();
+            $order_id = $stmt_order->insert_id;
+        }
+    } catch (Exception $e) {
+        $stmt_order = $conn->prepare("INSERT INTO orders (user_id, total, status, payment_method, payment_number) VALUES (?, ?, 'Pending', ?, ?)");
+        $stmt_order->bind_param("idss", $user_id, $total, $payment_method, $payment_number);
+        $stmt_order->execute();
+        $order_id = $stmt_order->insert_id;
+    }
 
-    $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, food_id, quantity, price) VALUES (?, ?, ?, ?)");
-    foreach ($_SESSION['cart'] as $item) {
-        $stmt_item->bind_param("iiid", $order_id, $item['id'], $item['quantity'], $item['price']);
-        $stmt_item->execute();
+    if ($order_id) {
+        $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, food_id, quantity, price) VALUES (?, ?, ?, ?)");
+        foreach ($_SESSION['cart'] as $item) {
+            $stmt_item->bind_param("iiid", $order_id, $item['id'], $item['quantity'], $item['price']);
+            $stmt_item->execute();
+        }
     }
 
     unset($_SESSION['cart']);
@@ -89,7 +86,7 @@ require_once 'includes/header.php';
                     <?php foreach ($_SESSION['cart'] as $item): ?>
                         <div class="py-3 flex items-center justify-between text-xs">
                             <div class="flex items-center gap-3">
-                                <img src="<?= htmlspecialchars($item['image']); ?>" class="w-10 h-10 rounded-lg object-cover">
+                                <img src="<?= !empty($item['image']) ? htmlspecialchars($item['image']) : 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'; ?>" class="w-10 h-10 rounded-lg object-cover">
                                 <div>
                                     <h4 class="font-bold line-clamp-1"><?= htmlspecialchars($item['name']); ?></h4>
                                     <span class="text-base-content/60"><?= $item['quantity']; ?> x $<?= number_format($item['price'], 2); ?></span>
@@ -128,7 +125,7 @@ require_once 'includes/header.php';
                     <p class="text-xs text-base-content/60 mb-4">Specify where your food should be delivered</p>
                     
                     <div class="form-control">
-                        <label class="label text-xs font-bold">Delivery Address</label>
+                        <label class="label text-xs font-bold">Delivery Address *</label>
                         <textarea name="shipping_address" rows="2" required placeholder="Enter full street address, apartment, building, city..." 
                                   class="textarea textarea-bordered text-sm font-medium"><?= htmlspecialchars($user['address'] ?? ''); ?></textarea>
                     </div>
